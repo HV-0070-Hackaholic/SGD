@@ -254,6 +254,29 @@ export default function App() {
     }
   }, []);
 
+  // Run ML Simulation
+  const handleRunPrediction = useCallback(async (zone = simZone, traffic = simTraffic, temp = simTemp, weather = simWeather) => {
+    setSimLoading(true);
+    try {
+      const res = await fetch(`${API_BASE}/simulate-zone`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          zone_id: zone,
+          temperature: parseFloat(temp),
+          traffic_density: parseFloat(traffic),
+          weather
+        })
+      });
+      const data = await res.json();
+      setSimResult(data);
+    } catch (err) {
+      console.error('Simulation request failed:', err);
+    } finally {
+      setSimLoading(false);
+    }
+  }, [simZone, simTraffic, simTemp, simWeather]);
+
   // WebSocket Connection Lifecycle with robust ping and instant message handler
   useEffect(() => {
     let pingInterval;
@@ -404,29 +427,6 @@ export default function App() {
       fetchAnalytics();
     } catch (err) {
       console.error('Failed to update status:', err);
-    }
-  };
-
-  // Run ML Simulation
-  const handleRunPrediction = async (zone = simZone, traffic = simTraffic, temp = simTemp, weather = simWeather) => {
-    setSimLoading(true);
-    try {
-      const res = await fetch(`${API_BASE}/simulate-zone`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          zone_id: zone,
-          temperature: parseFloat(temp),
-          traffic_density: parseFloat(traffic),
-          weather
-        })
-      });
-      const data = await res.json();
-      setSimResult(data);
-    } catch (err) {
-      console.error('Simulation request failed:', err);
-    } finally {
-      setSimLoading(false);
     }
   };
 
@@ -1681,12 +1681,14 @@ export default function App() {
                   ))}
 
                   {/* Incident Markers */}
-                  {showIncidents && filteredIncidents.map((inc) => (
-                    <Marker
-                      key={`inc-${inc.id}`}
-                      position={[inc.lat, inc.lng]}
-                      icon={createCustomIcon(inc.priority, inc.status)}
-                    >
+                  {showIncidents && filteredIncidents.map((inc) => {
+                    if (inc.lat == null || inc.lng == null || isNaN(inc.lat) || isNaN(inc.lng)) return null;
+                    return (
+                      <Marker
+                        key={`inc-${inc.id}`}
+                        position={[inc.lat, inc.lng]}
+                        icon={createCustomIcon(inc.priority, inc.status)}
+                      >
                       <Popup>
                         <div className="p-3.5 space-y-2 min-w-[250px] text-slate-100">
                           <div className="flex items-center justify-between border-b border-slate-700/80 pb-1.5">
@@ -1714,7 +1716,8 @@ export default function App() {
                         </div>
                       </Popup>
                     </Marker>
-                  ))}
+                    );
+                  })}
                 </MapContainer>
 
                 {/* Floating Military HUD Overlay (Bottom-Left) */}

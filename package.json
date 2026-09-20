@@ -4,6 +4,7 @@
   "private": true,
   "description": "GovPulse AI Smart Governance Dashboard Root Workspace - Telangana & India Command",
   "scripts": {
+    "build": "cd smart-governance-dashboard/frontend && npm install && npm run build",
     "start": "powershell -ExecutionPolicy Bypass -File smart-governance-dashboard/start-all.ps1",
     "start:backend": "cd smart-governance-dashboard/backend && npm run dev",
     "start:frontend": "cd smart-governance-dashboard/frontend && npm run dev",
