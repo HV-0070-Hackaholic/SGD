@@ -32,8 +32,9 @@ import {
 
 import { LANGUAGES, TRANSLATIONS } from './data/translations.js';
 
-const API_BASE = 'http://localhost:5000/api';
-const WS_BASE = 'ws://localhost:5000';
+const backendUrl = (import.meta.env.VITE_API_URL || 'http://localhost:5000').replace(/\/$/, '');
+const API_BASE = `${backendUrl}/api`;
+const WS_BASE = import.meta.env.VITE_WS_URL || backendUrl.replace(/^http/, 'ws');
 
 // Custom Map Marker Icons using Leaflet divIcon with transparent wrapper
 const createCustomIcon = (priority, status) => {
